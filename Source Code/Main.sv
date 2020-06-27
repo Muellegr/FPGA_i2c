@@ -48,6 +48,8 @@ This is a empty template for the DE10 lite.   Has a lot of premade stuff added t
 	Or you can do assign segmentDisplay_DisplayValue = 999999   and it'll display that.  
 	If you do segmentDisplayValue = 200'd52359812948793257    it'll take the 20 right-most bits and display.  It probably won't display '793257'.  
 */
+`include "Main.svh"
+
 module Main(
 	//GPIO
 	max10Board_50MhzClock,
@@ -58,10 +60,6 @@ module Main(
 	max10Board_LED
 
 );
-parameter SEGMENT_DISPLAY_COUNT = 6;
-parameter LED_COUNT = 10;
-parameter BUTTON_COUNT = 2;
-parameter SWITCH_COUNT = 10;
 
 	/////////////////////////////////////////////////////////
 	input  wire	max10Board_50MhzClock;
@@ -73,139 +71,135 @@ parameter SWITCH_COUNT = 10;
 	/////////////////////////////////////////////////////////
 	wire systemReset_n = max10Board_Buttons[0]; //active low reset when button0 is held down.
 
-	//--EXAMPLE LIGHTS
-	assign max10Board_LED[0] = 1'b1 ; //This turns it on
-	assign max10Board_LED[3:1] = max10board_switches[2:0]; //Switch 0 connects to LED 1, switch 1 connects to LED2, switch 2 connects to LED 3.
+	// //--EXAMPLE LIGHTS
+	 assign max10Board_LED[0] = clk_1hz;
+	 assign max10Board_LED[1] = clk_1hz_s;
 
-	assign max10Board_LED[4] = CLK_1hz; //Turn on and off 
-
-	assign segmentDisplay_DisplayValue = (max10board_switches[9] == 0)? 20'd987654 : microphoneInputSample; // If switch is off, use 20'd987654.  If on, use microphoneInputSample
-
-	assign max10Board_LED[9:5] = (microphoneInputSample > 100 && microphoneInputSample < 110 ) ? 5'b10101 : 2'b00; //When sine wave is between 100 and 110, turn them on in specific fashion. 
-			//This one assigns 5,6, 7, 8, 9   but if it fails the check, assigns only 2 bits. Quartus will fill in the extra 3 bits with '0'. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	 assign max10Board_LED[2] = max10Board_50MhzClock;
 
 
 
 
 	/////////////////////////////////////////////////////////
-	//Bunch of varoius timed clocks for stuff.  The ClockGenerator module has the equation if you want to make your own clock.
-	// 1KHz clock
-	wire CLK_1Khz ;
-	ClockGenerator clockGenerator_1Khz (
-		.inputClock(max10Board_50MhzClock),
+
+	wire clk_1hz ;
+	ClockGenerator clockgenerator_1hz (
+		.inputClock(clk_50Mhz),
 		.reset_n(systemReset_n),
-		.outputClock(CLK_1Khz)
+		.outputClock(clk_1hz)
 	);
-		defparam	clockGenerator_1Khz.BitsNeeded = 15; //Must be able to count up to InputClockEdgesToCount.  
-		defparam	clockGenerator_1Khz.InputClockEdgesToCount = 25000;
+		defparam clockgenerator_1hz.INPUT_CLOCK_SPEED = MAIN_CLOCK; //must be able to count up to inputclockedgestocount.  
+		defparam clockgenerator_1hz.OUTPUT_CLOCK_SPEED = 1;
 		
-	//  100Hz Clock
-	wire CLK_100hz ;
-	ClockGenerator clockGenerator_100hz (
-		.inputClock(max10Board_50MhzClock),
-		.reset_n(systemReset_n),
-		.outputClock(CLK_100hz)
-	);
-		defparam	clockGenerator_100hz.BitsNeeded = 25; //Must be able to count up to InputClockEdgesToCount.  
-		defparam	clockGenerator_100hz.InputClockEdgesToCount = 250000;
 	
-	//  10Hz clock
-	wire CLK_10hz ;
-	ClockGenerator clockGenerator_10hz (
+	wire clk_1hz_s ;
+	ClockGenerator clockgenerator_1hz_s (
 		.inputClock(max10Board_50MhzClock),
 		.reset_n(systemReset_n),
-		.outputClock(CLK_10hz)
+		.outputClock(clk_1hz_s)
 	);
-		defparam	clockGenerator_10hz.BitsNeeded = 35; //Must be able to count up to InputClockEdgesToCount.  
-		defparam	clockGenerator_10hz.InputClockEdgesToCount = 2500000;
-	
-	//  22050Hz clock
-	wire CLK_22Khz ;
-	ClockGenerator clockGenerator_22Khz (
-		.inputClock(max10Board_50MhzClock),
-		.reset_n(systemReset_n),
-		.outputClock(CLK_22Khz)
-	);
-		defparam	clockGenerator_22Khz.BitsNeeded = 16; //Must be able to count up to InputClockEdgesToCount.  
-		defparam	clockGenerator_22Khz.InputClockEdgesToCount = 1133;
+		defparam clockgenerator_1hz_s.INPUT_CLOCK_SPEED = MAIN_CLOCK; //must be able to count up to inputclockedgestocount.  
+		defparam clockgenerator_1hz_s.OUTPUT_CLOCK_SPEED = 1;
 
-	//  32KHz clock
-	wire CLK_32Khz ;
-	ClockGenerator clockGenerator_32Khz (
-		.inputClock(max10Board_50MhzClock),
-		.reset_n(systemReset_n),
-		.outputClock(CLK_32Khz)
-	);
-		defparam	clockGenerator_32Khz.BitsNeeded = 16; //Must be able to count up to InputClockEdgesToCount.  
-		defparam	clockGenerator_32Khz.InputClockEdgesToCount = 781; //OLD : 781* 0.975 = 762
 
-	wire CLK_500Khz ;
-	ClockGenerator clockGenerator_500Khz (
+	wire clk_50Mhz ;
+	ClockGenerator clockgenerator_Mhz (
 		.inputClock(max10Board_50MhzClock),
 		.reset_n(systemReset_n),
-		.outputClock(CLK_500Khz)
+		.outputClock(clk_50Mhz)
 	);
-		defparam	clockGenerator_500Khz.BitsNeeded = 16; //Must be able to count up to InputClockEdgesToCount.  
-		defparam	clockGenerator_500Khz.InputClockEdgesToCount = 50; //OLD : 781* 0.975 = 762
+		defparam clockgenerator_Mhz.INPUT_CLOCK_SPEED = MAIN_CLOCK; //must be able to count up to inputclockedgestocount.  
+		defparam clockgenerator_Mhz.OUTPUT_CLOCK_SPEED = MAIN_CLOCK;
+	// //  100Hz Clock
+	// wire CLK_100hz ;
+	// ClockGenerator clockGenerator_100hz (
+	// 	.inputClock(max10Board_50MhzClock),
+	// 	.reset_n(systemReset_n),
+	// 	.outputClock(CLK_100hz)
+	// );
+	// 	defparam	clockGenerator_100hz.BitsNeeded = 25; //Must be able to count up to InputClockEdgesToCount.  
+	// 	defparam	clockGenerator_100hz.InputClockEdgesToCount = 250000;
 	
-	//  1s clock
-	wire CLK_1hz ;
-	ClockGenerator clockGenerator_1hz (
-		.inputClock(CLK_1Khz),
-		.reset_n(systemReset_n),
-		.outputClock(CLK_1hz)
-	);
-		defparam	clockGenerator_1hz.BitsNeeded = 10; //Must be able to count up to InputClockEdgesToCount.  
-		defparam	clockGenerator_1hz.InputClockEdgesToCount = 500;
+	// //  10Hz clock
+	// wire CLK_10hz ;
+	// ClockGenerator clockGenerator_10hz (
+	// 	.inputClock(max10Board_50MhzClock),
+	// 	.reset_n(systemReset_n),
+	// 	.outputClock(CLK_10hz)
+	// );
+	// 	defparam	clockGenerator_10hz.BitsNeeded = 35; //Must be able to count up to InputClockEdgesToCount.  
+	// 	defparam	clockGenerator_10hz.InputClockEdgesToCount = 2500000;
 	
-	//-----------------------
-	//--7 Segment Display Control. 
-	//-----------------------
+	// //  22050Hz clock
+	// wire CLK_22Khz ;
+	// ClockGenerator clockGenerator_22Khz (
+	// 	.inputClock(max10Board_50MhzClock),
+	// 	.reset_n(systemReset_n),
+	// 	.outputClock(CLK_22Khz)
+	// );
+	// 	defparam	clockGenerator_22Khz.BitsNeeded = 16; //Must be able to count up to InputClockEdgesToCount.  
+	// 	defparam	clockGenerator_22Khz.InputClockEdgesToCount = 1133;
+
+	// //  32KHz clock
+	// wire CLK_32Khz ;
+	// ClockGenerator clockGenerator_32Khz (
+	// 	.inputClock(max10Board_50MhzClock),
+	// 	.reset_n(systemReset_n),
+	// 	.outputClock(CLK_32Khz)
+	// );
+	// 	defparam	clockGenerator_32Khz.BitsNeeded = 16; //Must be able to count up to InputClockEdgesToCount.  
+	// 	defparam	clockGenerator_32Khz.InputClockEdgesToCount = 781; //OLD : 781* 0.975 = 762
+
+	// wire CLK_500Khz ;
+	// ClockGenerator clockGenerator_500Khz (
+	// 	.inputClock(max10Board_50MhzClock),
+	// 	.reset_n(systemReset_n),
+	// 	.outputClock(CLK_500Khz)
+	// );
+	// 	defparam	clockGenerator_500Khz.BitsNeeded = 16; //Must be able to count up to InputClockEdgesToCount.  
+	// 	defparam	clockGenerator_500Khz.InputClockEdgesToCount = 50; //OLD : 781* 0.975 = 762
+	
+	// //  1s clock
+	// wire CLK_1hz ;
+	// ClockGenerator clockGenerator_1hz (
+	// 	.inputClock(CLK_1hz),
+	// 	.reset_n(systemReset_n),
+	// 	.outputClock(CLK_1hz)
+	// );
+	// 	defparam	clockGenerator_1hz.BitsNeeded = 10; //Must be able to count up to InputClockEdgesToCount.  
+	// 	defparam	clockGenerator_1hz.InputClockEdgesToCount = 500;
+	
+	// //-----------------------
+	// //--7 Segment Display Control. 
+	// //-----------------------
 	reg [19:0] segmentDisplay_DisplayValue ; //Set this to a number and it will display it up to 999999.  
 	SevenSegmentParser sevenSegmentParser(
 		.displayValue(segmentDisplay_DisplayValue),
 		.segmentPins(max10Board_LEDSegments)
 	);
-	/////////////////////////////////////////////////////////
+	// /////////////////////////////////////////////////////////
 
 	
 	/////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////
 	//------------------------------------
 	//---Frequency Generator Sample ------
-	//------------------------------------
+	// //------------------------------------
 
-	reg [7:0] microphoneInputSample;  //This simulates ADC microphone input.  Updates automatically.
-	//--Sine
-	SignalGenerator signalGenerator_Sine0(
-		.CLK_32KHz(CLK_32Khz),
-		.reset_n(systemReset_n),
-		.inputFrequency(14'd1), //This is the frequency of the sine wave.   14'd300 = 300Hz , 14'd1000 = 1000Hz.   Limit : 8000Hz
-		.outputSample(microphoneInputSample)
-	);
-	//Not used, kept in case you want to combine multiple SignalGenerators into a single one.  
-	//--This is used to apply a amplitude ratio to a signal.  
-		// a = sinewave , b = volume    
-	function automatic  [7:0] SignalMultiply255 (input [7:0] a, input [7:0] b);
-		return  ( (a * b + 127) * 1/255);
-	endfunction
+	// reg [7:0] microphoneInputSample;  //This simulates ADC microphone input.  Updates automatically.
+	// //--Sine
+	// SignalGenerator signalGenerator_Sine0(
+	// 	.CLK_32KHz(CLK_32Khz),
+	// 	.reset_n(systemReset_n),
+	// 	.inputFrequency(14'd1), //This is the frequency of the sine wave.   14'd300 = 300Hz , 14'd1000 = 1000Hz.   Limit : 8000Hz
+	// 	.outputSample(microphoneInputSample)
+	// );
+	// //Not used, kept in case you want to combine multiple SignalGenerators into a single one.  
+	// //--This is used to apply a amplitude ratio to a signal.  
+	// 	// a = sinewave , b = volume    
+	// function automatic  [7:0] SignalMultiply255 (input [7:0] a, input [7:0] b);
+	// 	return  ( (a * b + 127) * 1/255);
+	// endfunction
 
 
 endmodule
