@@ -22,3 +22,5 @@ module SevenSegmentDisplay(
 		 default: segments = 7'b010_1010; 
 	 endcase 
 endmodule
+
+

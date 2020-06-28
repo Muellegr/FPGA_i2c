@@ -172,7 +172,8 @@ module Main(
 	// //-----------------------
 	// //--7 Segment Display Control. 
 	// //-----------------------
-	reg [19:0] segmentDisplay_DisplayValue ; //Set this to a number and it will display it up to 999999.  
+	logic [SEGMENT_DISPLAY_VALUE_B:0] segmentDisplay_DisplayValue ; //Set this to a number and it will display it up to 999999.  
+	assign segmentDisplay_DisplayValue = 999999;
 	SevenSegmentParser sevenSegmentParser(
 		.displayValue(segmentDisplay_DisplayValue),
 		.segmentPins(max10Board_LEDSegments)
